@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PizzaApi.Data;
@@ -18,13 +19,14 @@ namespace PizzaApi.Controllers
 
         public UserController(UserContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         // GET: api/User
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserItemDTO>>> GetUserItems()
         {
+            if (_context.UserItems == null) return BadRequest();
             return await _context.UserItems.Select(u => UserItemToDTO(u)).ToListAsync();
         }
 
@@ -73,6 +75,18 @@ namespace PizzaApi.Controllers
             return NoContent();
         }
 
+        //[Route("api/[controller]/signup")]
+        //[HttpPost]
+        //public async Task<ActionResult<UserItemDTO>> PostUserSignup([FromBody] UserItemDTO signupRequest)
+        //{
+        //    if (signupRequest == null) return BadRequest();
+        //    var id = _context.UserItems.ToArray().Length + 1;
+        //    userItem.Id = id;
+
+
+        //    return Ok();
+        //}
+
         // POST: api/User
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -81,7 +95,10 @@ namespace PizzaApi.Controllers
             var id = _context.UserItems.ToArray().Length +1;
             userItem.Id = id;
             // salt & hash. 
-            
+            var passwordHasher = new PasswordHasher<UserItem>();
+            var hashedCred = passwordHasher.HashPassword(userItem, userItem.Credential);
+            userItem.Credential = hashedCred;
+
             _context.UserItems.Add(userItem);
             await _context.SaveChangesAsync();
 

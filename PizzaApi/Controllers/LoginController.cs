@@ -20,10 +20,11 @@ namespace PizzaApi.Controllers
 
         private IConfiguration _config;
         private readonly UserContext _context;
+
         public LoginController(IConfiguration config, UserContext context)
         {
-            _config = config;
-            _context = context;
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         [HttpPost]
