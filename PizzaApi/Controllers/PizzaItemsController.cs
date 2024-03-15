@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PizzaApi.Data;
 using PizzaApi.Models;
 
 namespace PizzaApi.Controllers
 {
     [Route("api/[controller]")]
+    [Route("api/Menu")]
     [ApiController]
     public class PizzaItemsController : ControllerBase
     {
@@ -80,11 +82,18 @@ namespace PizzaApi.Controllers
         [HttpPost]
         public async Task<ActionResult<PizzaItemDTO>> PostPizzaItem(PizzaItemDTO pizzaItemDTO)
         {
+
+            // this is NOT ideal.
+            //I'd usually use SOL's Identity attribute on a column to generate the Key, but that wansn't working.
+            var id = (long) _context.PizzaItems.ToArray().Length +1;
             var pizzaItem = new PizzaItem
             {
+                Id = id,
                 Name = pizzaItemDTO.Name,
-                Price = pizzaItemDTO.Price
+                Price = pizzaItemDTO.Price,
+                Description = pizzaItemDTO.Description,
             };
+            
             _context.PizzaItems.Add(pizzaItem);
             await _context.SaveChangesAsync();
 
@@ -116,6 +125,7 @@ namespace PizzaApi.Controllers
             new PizzaItemDTO
             {
                 Id = pizzaItem.Id,
+                Price = pizzaItem.Price,
                 Name = pizzaItem.Name,
                 Description = pizzaItem.Description
             };

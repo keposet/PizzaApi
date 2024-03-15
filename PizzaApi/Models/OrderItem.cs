@@ -1,7 +1,10 @@
-﻿namespace PizzaApi.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PizzaApi.Models
 {
     public class OrderItem
     {
+        [Key]
         public long Id { get; set; }
         public long? CustomerId { get; set; }
         public string? CustomerName { get; set; }

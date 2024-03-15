@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PizzaApi.Models;
 
-namespace PizzaApi.Models
+namespace PizzaApi.Data
 {
     public class OrderContext : DbContext
     {

@@ -4,10 +4,13 @@
 
 namespace PizzaApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/foo")]
     [ApiController]
     public class MenuController : ControllerBase
     {
+        
+
+
         // GET: api/<MenuController>
         [HttpGet]
         public IEnumerable<string> Get()

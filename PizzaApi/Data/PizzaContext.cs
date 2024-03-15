@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PizzaApi.Models;
 
-namespace PizzaApi.Models
+namespace PizzaApi.Data
 {
     public class PizzaContext : DbContext
     {
@@ -8,6 +9,6 @@ namespace PizzaApi.Models
         {
         }
 
-        public DbSet<PizzaItem> PizzaItems { get; set; } = null;
+        public DbSet<PizzaItem>? PizzaItems { get; set; } = null;
     }
 }
