@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,8 +9,6 @@ using PizzaApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace PizzaApi.Controllers
 {
@@ -39,16 +38,14 @@ namespace PizzaApi.Controllers
             //validate password 
             if (userItem.Credential == null) return BadRequest();
             var hasher = new PasswordHasher<UserItem>();
-            hasher.VerifyHashedPassword(userItem, userItem.Credential, loginRequest.Password);
+            var hashResult = hasher.VerifyHashedPassword(userItem, userItem.Credential, loginRequest.Password);
+            if(hashResult == PasswordVerificationResult.Failed) return BadRequest();
             //add claims
-            var user = User as ClaimsPrincipal;
             var userClaims = new List<Claim>();
             if (userItem.Name == null) return BadRequest();
             if (userItem.Role == null) return BadRequest();
-
             userClaims.Add(new Claim("Name", userItem.Name));
-            var roleClaim = new Claim("Role", userItem.Role);
-
+            userClaims.Add(new Claim("Role", userItem.Role));
             var claimsIdentity = new ClaimsIdentity();
             claimsIdentity.AddClaims(userClaims);
 
@@ -62,10 +59,13 @@ namespace PizzaApi.Controllers
               expires: DateTime.Now.AddMinutes(120),
               signingCredentials: credentials
               );
-            
 
             var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
-
+            //include in header if desired
+            Response.Headers.Append("Authorization", $"Bearer {token}");
+            //include in cookie if desired
+            Response.Cookies.Append("AccessToken",$"{token}", new CookieOptions() { HttpOnly= true, SameSite = SameSiteMode.Strict });
+            
             return Ok(token);
         }        
     }

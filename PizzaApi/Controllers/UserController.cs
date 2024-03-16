@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,7 @@ namespace PizzaApi.Controllers
         }
 
         // GET: api/User
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserItemDTO>>> GetUserItems()
         {
@@ -34,6 +36,8 @@ namespace PizzaApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<UserItemDTO>> GetUserItem(long id)
         {
+            
+            
             var userItem = await _context.UserItems.FindAsync(id);
 
             if (userItem == null)

@@ -16,9 +16,14 @@ builder.Services.AddDbContext<UserContext>(opt => opt.UseInMemoryDatabase("UserL
 var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
 var jwtKey = builder.Configuration.GetSection("Jwt:Key").Get<string>();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(auth =>
+{
+    auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
  .AddJwtBearer(options =>
  {
+     options.SaveToken = true;
      options.TokenValidationParameters = new TokenValidationParameters
      {
          ValidateIssuer = true,
@@ -29,12 +34,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
          ValidAudience = jwtIssuer,
          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
      };
+     options.Events = new JwtBearerEvents
+     {
+         OnMessageReceived = ctx =>
+         {
+             if (ctx.Request.Cookies.ContainsKey("AccessToken")) ctx.Token = ctx.Request.Cookies["AccessToken"];
+             return Task.CompletedTask;
+         }
+     }; 
  });
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Role", "Admin"));
 });
-
+//builder.Services.AddAuthorization();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
