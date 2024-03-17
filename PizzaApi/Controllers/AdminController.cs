@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PizzaApi.Models;
 using PizzaApi.Services;
 using PizzaApi.Utilities;
 
 namespace PizzaApi.Controllers
 {
+    [Authorize("AdminOnly")]
     [Route("api/[controller]/pizza")]
     [ApiController]
     public class AdminController : ControllerBase
