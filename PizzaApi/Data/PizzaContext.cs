@@ -5,7 +5,7 @@ namespace PizzaApi.Data
 {
     public class PizzaContext : DbContext
     {
-        public PizzaContext(DbContextOptions options) : base(options)
+        public PizzaContext(DbContextOptions<PizzaContext> options) : base(options)
         {
         }
 
