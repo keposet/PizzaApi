@@ -96,6 +96,7 @@ namespace PizzaApi.Controllers
         [HttpPost]
         public async Task<ActionResult<UserItemDTO>> PostUserItem(UserItem userItem)
         {
+            //TODO: create generic method
             var id = _context.UserItems.ToArray().Length +1;
             userItem.Id = id;
             // salt & hash. 

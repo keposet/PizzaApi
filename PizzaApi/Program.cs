@@ -1,26 +1,28 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PizzaApi.Data;
+using PizzaApi.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
+
+// Entity Framework
 builder.Services.AddDbContext<PizzaContext>(opt => opt.UseInMemoryDatabase("PizzaList"));
 builder.Services.AddDbContext<UserContext>(opt => opt.UseInMemoryDatabase("UserList"));
+builder.Services.AddDbContext<OrderContext>(opt => opt.UseInMemoryDatabase("OrderList"));
 
+//bespoke services
+builder.Services.AddSingleton<OrderHandler>();
+
+
+//auth
 var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
 var jwtKey = builder.Configuration.GetSection("Jwt:Key").Get<string>();
-
-builder.Services.AddAuthentication(auth =>
-{
-    auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
  .AddJwtBearer(options =>
  {
      options.SaveToken = true;
@@ -48,8 +50,8 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Role", "Admin"));
 });
-//builder.Services.AddAuthorization();
 
+//plumbing
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

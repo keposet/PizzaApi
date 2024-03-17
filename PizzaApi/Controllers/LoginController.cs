@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +25,7 @@ namespace PizzaApi.Controllers
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
+        //TODO: change login req to own model
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] LoginRequest loginRequest)
         {
@@ -46,8 +46,6 @@ namespace PizzaApi.Controllers
             if (userItem.Role == null) return BadRequest();
             userClaims.Add(new Claim("Name", userItem.Name));
             userClaims.Add(new Claim("Role", userItem.Role));
-            var claimsIdentity = new ClaimsIdentity();
-            claimsIdentity.AddClaims(userClaims);
 
             // token creation
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
