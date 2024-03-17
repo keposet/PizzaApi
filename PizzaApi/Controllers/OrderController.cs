@@ -19,56 +19,26 @@ namespace PizzaApi.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly OrderContext _context;
         private readonly OrderHandler _orderHandler;
 
-        public OrderController(OrderContext context, OrderHandler orderHandler)
+        public OrderController(OrderHandler orderHandler)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
             _orderHandler = orderHandler;
         }
-
-
 
         // POST: api/Order
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<OrderItemDTO>> PostOrderItem(OrderItemDTO orderItemDTO)
         {
-
-            // create id, create orderNum, calc total (items, plus tip)
-            var validate = await _orderHandler.ValidateOrder(orderItemDTO);
+            // validate biz. logic
+            var validate = _orderHandler.ValidateOrder(orderItemDTO);
             if (validate.IsError) return BadRequest(validate.Message);
-            
 
-            //Order total Calc. 
-
-            
-
-            var id = _context.OrderItems.ToArray().Length + 1;
-            var orderNum = _context.OrderItems.ToArray().Length + 1;
-            var orderItem = new OrderItem
-            {
-                Id = id,
-                CustomerName = orderItemDTO.CustomerName,
-                OrderNumber = orderNum,
-                OrderTimeStamp = DateTime.Now.ToUniversalTime(),
-                PizzaItems = orderItemDTO.PizzaItems,
-                OrderTotal = orderItemDTO.OrderTotal,
-                IsDelivery = orderItemDTO.IsDelivery,
-                DeliveryAddress = orderItemDTO.DeliveryAddress,
-                IsComplete = orderItemDTO.IsComplete,
-
-            };
-            _context.OrderItems.Add(orderItem);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetOrderItem", new { id = orderItem.Id }, orderItem);
+            //submit order
+            var submittedOrder = _orderHandler.SubmitOrder(orderItemDTO);
+            return CreatedAtAction("GetOrderItem", new { id = submittedOrder.Id }, submittedOrder);
         }
 
-        private bool OrderItemExists(long id)
-        {
-            return _context.OrderItems.Any(e => e.Id == id);
-        }
     }
 }

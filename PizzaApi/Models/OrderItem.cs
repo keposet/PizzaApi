@@ -10,7 +10,7 @@ namespace PizzaApi.Models
         public string? CustomerName { get; set; }
         public long? OrderNumber { get; set; }
         public DateTime? OrderTimeStamp { get; set; }
-        public List<PizzaItem>? PizzaItems { get; set; }
+        public List<long>? PizzaItems { get; set; }
         public double? OrderTotal { get; set; }
         public double? OrderTip { get; set; }
         public bool? IsDelivery { get; set; }
