@@ -1,4 +1,4 @@
-﻿namespace PizzaApi.Models
+﻿namespace PizzaApi.Utilities
 {
     public class ErrorMessage
     {

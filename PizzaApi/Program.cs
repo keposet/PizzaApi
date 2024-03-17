@@ -12,11 +12,13 @@ builder.Services.AddControllers();
 
 // Entity Framework
 builder.Services.AddDbContext<PizzaContext>(opt => opt.UseInMemoryDatabase("PizzaList"));
+
 builder.Services.AddDbContext<UserContext>(opt => opt.UseInMemoryDatabase("UserList"));
 builder.Services.AddDbContext<OrderContext>(opt => opt.UseInMemoryDatabase("OrderList"));
 
 //bespoke services
-builder.Services.AddSingleton<OrderHandler>();
+builder.Services.AddScoped<OrderHandler>();
+builder.Services.AddScoped<PizzaItemHandler>();
 
 
 //auth

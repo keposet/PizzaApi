@@ -1,46 +1,37 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.EntityFrameworkCore;
+using PizzaApi.Data;
+using PizzaApi.Models;
+using PizzaApi.Services;
 
 namespace PizzaApi.Controllers
 {
-    [Route("api/foo")]
+    [Route("api/[controller]")]
     [ApiController]
     public class MenuController : ControllerBase
     {
-        
+        private readonly PizzaContext _pizzaCtx;
+        private readonly PizzaItemHandler _pizzaItemHandler;
 
+        public MenuController(PizzaItemHandler pizzaItemHandler)
+        {
+            _pizzaItemHandler= pizzaItemHandler ?? throw new ArgumentNullException(nameof(pizzaItemHandler));
+        }
 
-        // GET: api/<MenuController>
+        // GET: api/PizzaItems
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult<IEnumerable<PizzaItemDTO>>> GetPizzaItems()
         {
-            return new string[] { "value1", "value2" };
+            return await _pizzaItemHandler.GetAllPizzaItems();
         }
 
-        // GET api/<MenuController>/5
+        // GET: api/PizzaItems/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<PizzaItemDTO>> GetPizzaItem(long id)
         {
-            return "value";
-        }
-
-        // POST api/<MenuController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/<MenuController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<MenuController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+            var pizzaItem = _pizzaItemHandler.GetPizzaItemById(id);
+            if(pizzaItem == null) return BadRequest("Item could not be found");
+            return Ok(pizzaItem);
+        }     
     }
 }

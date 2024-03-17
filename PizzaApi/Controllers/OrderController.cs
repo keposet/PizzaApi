@@ -19,7 +19,6 @@ namespace PizzaApi.Controllers
         }
 
         // POST: api/Order
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<OrderItemDTO>> PostOrderItem(OrderItemDTO orderItemDTO)
         {
@@ -28,8 +27,10 @@ namespace PizzaApi.Controllers
             if (validate.IsError) return BadRequest(validate.Message);
 
             //submit order
-            var submittedOrder = _orderHandler.SubmitOrder(orderItemDTO);
-            return CreatedAtAction("GetOrderItem", new { id = submittedOrder.Id }, submittedOrder);
+            var submittedOrder = await _orderHandler.SubmitOrder(orderItemDTO);
+
+            //return data
+            return  Ok(submittedOrder);
         }
 
     }
