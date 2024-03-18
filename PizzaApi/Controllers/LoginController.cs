@@ -30,14 +30,14 @@ namespace PizzaApi.Controllers
 
         //TODO: change login req to own model
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] LoginRequestModel loginRequest)
+        public async Task<IActionResult> Post([FromBody] LoginDTO loginDTO)
         {
-            var authenticateStatus = await _authHandler.Authenticate(loginRequest);
+            var authenticateStatus = await _authHandler.Authenticate(loginDTO);
             if (authenticateStatus.IsError)
             {
                 return BadRequest(authenticateStatus.Message);
             }
-            var token = await _authHandler.Authorize(loginRequest); 
+            var token = await _authHandler.Authorize(loginDTO); 
 
             //include in header if desired
             Response.Headers.Append("Authorization", $"Bearer {token}");

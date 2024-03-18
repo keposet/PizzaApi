@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PizzaApi.Data;
 using PizzaApi.Models;
+using PizzaApi.Services;
 
 namespace PizzaApi.Controllers
 {
@@ -16,126 +17,38 @@ namespace PizzaApi.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UserContext _context;
-
-        public UserController(UserContext context)
+        
+        private readonly UserHandler _userHandler;
+        private readonly AuthHandler _authHandler;
+        public UserController(UserHandler userHandler, AuthHandler authHandler)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _authHandler = authHandler;
+            _userHandler = userHandler;
         }
 
-        // GET: api/User
-        [Authorize]
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserItemDTO>>> GetUserItems()
-        {
-            if (_context.UserItems == null) return BadRequest();
-            return await _context.UserItems.Select(u => UserItemToDTO(u)).ToListAsync();
-        }
-
-        // GET: api/User/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserItemDTO>> GetUserItem(long id)
-        {
-            
-            
-            var userItem = await _context.UserItems.FindAsync(id);
-
-            if (userItem == null)
-            {
-                return NotFound();
-            }
-
-            return UserItemToDTO(userItem);
-        }
-
-        // PUT: api/User/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUserItem(long id, UserItemDTO userItemDTO)
-        {
-            if (id != userItemDTO.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(userItemDTO).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserItemExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        //[Route("api/[controller]/signup")]
-        //[HttpPost]
-        //public async Task<ActionResult<UserItemDTO>> PostUserSignup([FromBody] UserItemDTO signupRequest)
-        //{
-        //    if (signupRequest == null) return BadRequest();
-        //    var id = _context.UserItems.ToArray().Length + 1;
-        //    userItem.Id = id;
-
-
-        //    return Ok();
-        //}
+        //GET PUT DELETE removed according to spec. 
 
         // POST: api/User
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<UserItemDTO>> PostUserItem(UserItem userItem)
         {
-            //TODO: create generic method
-            var id = _context.UserItems.ToArray().Length +1;
-            userItem.Id = id;
-            // salt & hash. 
-            var passwordHasher = new PasswordHasher<UserItem>();
-            var hashedCred = passwordHasher.HashPassword(userItem, userItem.Credential);
+            //verify inputs. 
+            var inputStatus = _userHandler.ValidateUserData(userItem);
+            if(inputStatus.IsError)
+            {
+                return BadRequest(inputStatus.Message);
+            }
+            
+            // salt & hash password for storage 
+            var hashedCred = _authHandler.HashPassword(userItem);
             userItem.Credential = hashedCred;
 
-            _context.UserItems.Add(userItem);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUserItem", new { id = userItem.Id }, userItem);
+            //save user
+            var userItemDTO = await _userHandler.WriteUserItem(userItem);
+            
+            return Ok(userItemDTO);
         }
 
-        // DELETE: api/User/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUserItem(long id)
-        {
-            var userItem = await _context.UserItems.FindAsync(id);
-            if (userItem == null)
-            {
-                return NotFound();
-            }
-
-            _context.UserItems.Remove(userItem);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool UserItemExists(long id)
-        {
-            return _context.UserItems.Any(e => e.Id == id);
-        }
-
-        private static UserItemDTO UserItemToDTO(UserItem userItem) => new UserItemDTO
-        {
-            Id = userItem.Id,
-            Name =  userItem.Name,
-            Role = userItem.Role,
-        };
+        
     }
 }

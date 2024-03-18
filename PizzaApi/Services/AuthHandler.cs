@@ -21,11 +21,11 @@ namespace PizzaApi.Services
             _config = config;
         }
 
-        public async Task<ErrorMessage> Authenticate(LoginRequestModel loginRequestModel)
+        public async Task<ErrorMessage> Authenticate(LoginDTO loginDTO)
         {
             var status = new ErrorMessage { IsError = true };
             //retrieve user & validate
-            var userItem = await FindUserByName(loginRequestModel.Name);
+            var userItem = await FindUserByName(loginDTO.Name);
             if (userItem == null) 
             {
                 status.Message = "User Not Found";
@@ -48,7 +48,7 @@ namespace PizzaApi.Services
             }
             
             //validate password
-            var hashResult = VerifyPassword(userItem, loginRequestModel.Password);
+            var hashResult = VerifyPassword(userItem, loginDTO.Password);
             if (hashResult == PasswordVerificationResult.Failed) 
             {
                 status.Message = "Authentication Error";
@@ -58,10 +58,10 @@ namespace PizzaApi.Services
             return status;
         }
 
-        public async Task<string> Authorize(LoginRequestModel loginRequestModel)
+        public async Task<string> Authorize(LoginDTO loginDTO)
         {
 
-            var userItem = await FindUserByName(loginRequestModel.Name);
+            var userItem = await FindUserByName(loginDTO.Name);
             if (userItem == null) throw new NullReferenceException(nameof(userItem));
             if(userItem.Name == null) throw new NullReferenceException(nameof(userItem.Name));
             if (userItem.Role == null) throw new NullReferenceException(nameof(userItem.Role));
@@ -88,6 +88,14 @@ namespace PizzaApi.Services
             var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
 
             return token;
+        }
+
+        public string? HashPassword(UserItem userItem)
+        {
+            if (userItem.Credential == null) throw new NullReferenceException(nameof(userItem.Credential));
+            var passwordHasher = new PasswordHasher<UserItem>();
+            var hashedCred = passwordHasher.HashPassword(userItem, userItem.Credential);
+            return hashedCred;
         }
 
         private List<Claim> CompileClaims(Dictionary<string,string> userClaims)
