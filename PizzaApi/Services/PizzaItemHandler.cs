@@ -2,6 +2,7 @@
 using PizzaApi.Data;
 using PizzaApi.Models;
 using PizzaApi.Utilities;
+using System.Drawing.Imaging;
 
 namespace PizzaApi.Services
 {
@@ -14,7 +15,7 @@ namespace PizzaApi.Services
             _pizzaCtx = pizzaCtx ?? throw new ArgumentNullException(nameof(pizzaCtx));
         }
 
-        public async Task<List<PizzaItemDTO>> GetAllPizzaItems()
+        public async Task<List<PizzaItemDTO>> GetAllPizzaItemDTOs()
         {
             if(_pizzaCtx.PizzaItems == null) throw new NullReferenceException(nameof(_pizzaCtx.PizzaItems));
 
@@ -27,10 +28,10 @@ namespace PizzaApi.Services
         public async Task<List<MenuItemDTO>> GetAllMenuItems()
         {
             if (_pizzaCtx.PizzaItems == null) throw new NullReferenceException(nameof(_pizzaCtx.PizzaItems));
-
-            return await _pizzaCtx.PizzaItems
+            var items = await _pizzaCtx.PizzaItems
                 .Select(x => PizzaItemToMenuDTO(x))
                 .ToListAsync();
+            return items;
         }
 
         public async Task<PizzaItemDTO> GetPizzaItemById(long id)
@@ -77,8 +78,13 @@ namespace PizzaApi.Services
                 status.Message = "Id does not match supplied data";
                 return status;
             }
+            var pizzaItem =  await _pizzaCtx.PizzaItems.FindAsync(id);
+            if(pizzaItem.Price != pizzaItemDTO.Price) pizzaItem.Price = pizzaItemDTO.Price;
+            if (pizzaItem.Description != pizzaItemDTO.Description) pizzaItem.Description = pizzaItemDTO.Description;
+            if(pizzaItem.Name != pizzaItemDTO.Name) pizzaItem.Name = pizzaItemDTO.Name;
 
-            _pizzaCtx.Entry(pizzaItemDTO).State = EntityState.Modified;
+            //The Entity State is being tracked by the database. 
+            _pizzaCtx.Entry(pizzaItem).State = EntityState.Modified;
 
             try
             {

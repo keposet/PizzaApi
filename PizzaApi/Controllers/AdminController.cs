@@ -26,16 +26,19 @@ namespace PizzaApi.Controllers
         public async Task<IActionResult> PostPizzaItem(PizzaItemAdminDTO pizzaItemAdminDto)
         {
             if (pizzaItemAdminDto == null) return BadRequest("null object");
+            
             var isUpdate = pizzaItemAdminDto.IsUpdate ?? false;
             var isDelete = pizzaItemAdminDto.IsDelete ?? false;
             if(isUpdate)
             {
+                if (pizzaItemAdminDto.Id == null || pizzaItemAdminDto.Id == 0) return BadRequest("Must supply valid id");
                 var updateDTO = pizzaItemAdminDto.ToDTO();
                 var status = await _pizzaItemHandler.UpdatePizzaItemById(updateDTO.Id, updateDTO);
                 return _errorHandler.ErrorMessageHandler(status);
             }
             if (isDelete)
-            {   
+            {
+                if (pizzaItemAdminDto.Id == null || pizzaItemAdminDto.Id == 0) return BadRequest("Must supply valid id");
                 var status = await _pizzaItemHandler.DeletePizzaItemById(pizzaItemAdminDto.Id);
                 return _errorHandler.ErrorMessageHandler(status);
             }

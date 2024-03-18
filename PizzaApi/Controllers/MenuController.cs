@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PizzaApi.Data;
 using PizzaApi.Models;
@@ -20,16 +21,20 @@ namespace PizzaApi.Controllers
 
         // GET: api/PizzaItems
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MenuItemDTO>>> GetPizzaItems()
+        public async Task<IActionResult> GetPizzaItems()
         {
-            return await _pizzaItemHandler.GetAllMenuItems();
+            var menu=  await _pizzaItemHandler.GetAllMenuItems();
+
+            return Ok(menu);
         }
+
+        
 
         // GET: api/PizzaItems/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<PizzaItemDTO>> GetPizzaItem(long id)
+        public async Task<IActionResult> GetPizzaItem(long id)
         {
-            var pizzaItem = _pizzaItemHandler.GetPizzaItemById(id);
+            var pizzaItem = await _pizzaItemHandler.GetPizzaItemById(id);
             if(pizzaItem == null) return BadRequest("Item could not be found");
             return Ok(pizzaItem);
         }     

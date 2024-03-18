@@ -13,7 +13,6 @@ builder.Services.AddControllers();
 
 // Entity Framework
 builder.Services.AddDbContext<PizzaContext>(opt => opt.UseInMemoryDatabase("PizzaList"));
-
 builder.Services.AddDbContext<UserContext>(opt => opt.UseInMemoryDatabase("UserList"));
 builder.Services.AddDbContext<OrderContext>(opt => opt.UseInMemoryDatabase("OrderList"));
 
@@ -21,7 +20,9 @@ builder.Services.AddDbContext<OrderContext>(opt => opt.UseInMemoryDatabase("Orde
 builder.Services.AddSingleton<ErrorHandler>();
 builder.Services.AddScoped<OrderHandler>();
 builder.Services.AddScoped<PizzaItemHandler>();
-
+builder.Services.AddScoped<UserHandler>();
+builder.Services.AddScoped<AuthHandler>();
+builder.Services.AddTransient<ErrorHandler>();
 
 
 
@@ -54,7 +55,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Role", "Admin"));
+    options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Role", "admin"));
 });
 
 //plumbing

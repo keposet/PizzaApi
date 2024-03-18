@@ -60,7 +60,8 @@ namespace PizzaApi.Services
         private bool IsNameUnique(string name)
         {
             if (_userContext.UserItems == null) throw new NullReferenceException(nameof(_userContext.UserItems));
-            return _userContext.UserItems.Where(usr => usr.Name == name).Any();
+            var x = _userContext.UserItems;
+            return !_userContext.UserItems.Where(usr => usr.Name == name).Any(); //returns false when name is unique.
         }
 
         private long GetNewRecordId()
