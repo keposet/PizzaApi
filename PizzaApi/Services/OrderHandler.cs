@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
 using Microsoft.IdentityModel.Tokens;
 using PizzaApi.Data;
 using PizzaApi.Models;
 using PizzaApi.Utilities;
-using System.ComponentModel;
+
 
 namespace PizzaApi.Services
 {
@@ -37,6 +37,16 @@ namespace PizzaApi.Services
             if( orderItemDTO.PizzaItems.IsNullOrEmpty()) 
             {
                 errorMessage.Message = "Order submitted without any items";
+                return errorMessage;
+            }
+            if(orderItemDTO.CustomerName.IsNullOrEmpty())
+            {
+                errorMessage.Message = "Order must include customer name";
+                return errorMessage;
+            }
+            if(GetCustomerId(orderItemDTO.CustomerName) == null)
+            {
+                errorMessage.Message = "Name Not Found";
                 return errorMessage;
             }
             return new ErrorMessage { IsError = false};
@@ -82,6 +92,7 @@ namespace PizzaApi.Services
             var pizzaItems = new List<PizzaItem>();
             foreach (var id in pizzaIds)
             {
+                // TODO: Brittle selector.
                 var price = _pizzaCtx.PizzaItems.Where(x => x.Id == id).First().Price;
                 total += price;
             }
@@ -94,14 +105,21 @@ namespace PizzaApi.Services
         public long? GetCustomerId(string customerName)
         {
             var userItems = _userCtx.UserItems?? throw new NullReferenceException(nameof(_userCtx.UserItems));
-            var id = userItems.Where(usr => usr.Name == customerName).First().Id;
-            return id;
+            // TODO: Brittle selector.
+            var user = userItems.Where(usr => usr.Name == customerName).FirstOrDefault();
+            if (user == null) return null;
+
+            return user.Id;
         }
 
         public long GetOrderId()
         {
             var orderItems = _orderCtx.OrderItems ?? throw new ArgumentNullException(nameof(_orderCtx.OrderItems));
-            var id = orderItems.ToArray().Length +1;
+            long id = 1;
+            if(orderItems.ToArray().Length > 0)
+            {
+                id = orderItems.OrderByDescending(x => x.Id).First().Id +1;
+            }
             return id;
         }
 

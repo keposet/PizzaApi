@@ -2,7 +2,7 @@
 using PizzaApi.Data;
 using PizzaApi.Models;
 using PizzaApi.Utilities;
-using System.Drawing.Imaging;
+
 
 namespace PizzaApi.Services
 {
@@ -50,8 +50,11 @@ namespace PizzaApi.Services
             // this is NOT ideal.
             //I'd usually use SOL's Identity attribute on a column to generate the Key
             // I'm sure EF has that ability, but my unfamiarity with the tool was making research challenging.
-            var id = (long)_pizzaCtx.PizzaItems.ToArray().Length + 1;
-
+            long id = 1;
+            if(_pizzaCtx.PizzaItems.ToArray().Length > 0)
+            {
+                id = _pizzaCtx.PizzaItems.OrderByDescending(x => x.Id).First().Id+1;
+            }
 
             var pizzaItem = new PizzaItem
             {
