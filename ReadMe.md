@@ -35,7 +35,7 @@ Unauthorized users can see this endpoint, but will recieve a 403 forbidden error
 Authorization is derived from a user with a Role of "admin" - case sensitive, which results in a JWT with a ["Role":"admin"] claim.
 
 Full Schema
-`
+```
 {
 id	integer($int64)
 name	string nullable
@@ -44,16 +44,18 @@ description	string nullable
 isDelete	boolean nullable
 isUpdate	boolean nullable
 }
-`
+```
 #### POST - Add Pizza
 Required Schema
-`{
+```
+{
   "name": "string",
   "price": 0,
   "description": "string",
   "isDelete": false,
   "isUpdate": false
-}`
+}
+```
 
 Id is calculated server side, and can be removed from the payload if desired.
 Name, description, and price can be omitted, but that may cause errors with the menu and ordering.
@@ -61,40 +63,40 @@ isDelete, and isUpdate flags must be set to false to add the pizza to the menu.
 
 #### POST - Remove Pizza
 Required Schema
-`
+```
 {
   "id":5,
   "isDelete": true,
   "isUpdate": false
 }
-`
+```
 
 Only Id, and the isDelete/isUpdate flags are required, the other fields can be included without causing an issue
 isDelete must be set to true, id must be a valid id, however an invalid ID is gracefully handled. 
 
 #### POST - Update Pizza Price
 Required Schema
-`
+```
 {
   "id":3,
   "price": 10,
   "isDelete": false,
   "isUpdate": true
 }
-`
+```
 id, price, and the isDelete/isUpdate flags are required as shown. 
 name, and description can be included, and will modify the record as well
 
 #### PUT - Update Pizza Record
 Required Schema
-`
+```
 {
   "id":3,
   "price": 10,
   "isDelete": false,
   "isUpdate": true
 }
-`
+```
 Required Path : /api/Admin/pizza/3
 
 This endpoint isn't explicitly requested by the design doc, but I wanted to include it in case there was an implicit expectation of following REST standards.
@@ -110,10 +112,12 @@ This endpoint allows users to authenticate/authorize.
 This endpoint handles password authentication/verification and creates JWT tokens on successful logins.
 #### Post
 Required Schema
-  ```{
+  ```
+{
     "name": "user",
     "password": "guest"
-  }```
+}
+```
 
 Successful login returns a JWT token in the authorization header, adds a token cookie for Swagger compatibility, and outputs the token to the response body for convenience.
 
@@ -122,7 +126,7 @@ Successful login returns a JWT token in the authorization header, adds a token c
 Path : /api/Menu
 This Endpoint outputs a JSON array of menu items.
 Example : 
-
+```
   [
     {
       "id": 1,
@@ -145,26 +149,26 @@ Example :
       "price": 15
     }
   ]
-
+```
 
 #### Get Detail
 Path : /api/Menu/{id}
 This endpoint provides a detail view of a menu item
 Example Path : /api/Menu/1
 Example Output: 
-
+```
   {
     "id": 1,
     "name": "cheese",
     "price": 10,
     "description": "a cheese pizza."
   }
-
+```
 
 ### /api/Order
 #### Post
 Required Schema
-`
+```
 {
   "customerName": "string",
   "pizzaItems": [
@@ -175,7 +179,7 @@ Required Schema
   "isPickup": true/false,
   "deliveryAddress": "string", 
 }
-`
+```
 
 Path: /api/Order
 This endpoint allows a user to place an order. 
@@ -190,7 +194,8 @@ Ordering a pizza that does not exist fails badly.
 **Deviation from design doc** While there was no explicit request to include a field for a tip, or calculate a bill total, it seemed pertinent to include these fields and behaviour.
 
 Example Output: 
-`{
+```
+{
   "customerName": "admin",
   "orderNumber": 2,
   "orderTimeStamp": "2024-03-18T06:18:13.8890338Z",
@@ -203,18 +208,19 @@ Example Output:
   "isPickup": null,
   "deliveryAddress": null,
   "isComplete": null
-}`
+}
+```
 
 ### api/User
 #### Post
 Required Schema
-`
+```
 {
   "name": "steve",
   "credential": "guest",
   "role": "scuba"
 }
-`
+```
 This endpoint functions as a signup form. 
 Users are allowed to declare their own roles, purely for testing convenience. 
 A role must be included, but only the role of "admin" will provide special priveleges.
