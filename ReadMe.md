@@ -110,10 +110,10 @@ This endpoint allows users to authenticate/authorize.
 This endpoint handles password authentication/verification and creates JWT tokens on successful logins.
 #### Post
 Required Schema
-  {
+  ```{
     "name": "user",
     "password": "guest"
-  }
+  }```
 
 Successful login returns a JWT token in the authorization header, adds a token cookie for Swagger compatibility, and outputs the token to the response body for convenience.
 
