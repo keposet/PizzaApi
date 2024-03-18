@@ -20,9 +20,9 @@ namespace PizzaApi.Controllers
 
         // GET: api/PizzaItems
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PizzaItemDTO>>> GetPizzaItems()
+        public async Task<ActionResult<IEnumerable<MenuItemDTO>>> GetPizzaItems()
         {
-            return await _pizzaItemHandler.GetAllPizzaItems();
+            return await _pizzaItemHandler.GetAllMenuItems();
         }
 
         // GET: api/PizzaItems/5

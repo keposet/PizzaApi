@@ -24,6 +24,15 @@ namespace PizzaApi.Services
 
         }
 
+        public async Task<List<MenuItemDTO>> GetAllMenuItems()
+        {
+            if (_pizzaCtx.PizzaItems == null) throw new NullReferenceException(nameof(_pizzaCtx.PizzaItems));
+
+            return await _pizzaCtx.PizzaItems
+                .Select(x => PizzaItemToMenuDTO(x))
+                .ToListAsync();
+        }
+
         public async Task<PizzaItemDTO> GetPizzaItemById(long id)
         {
             if (_pizzaCtx.PizzaItems == null) throw new NullReferenceException(nameof(_pizzaCtx.PizzaItems));
@@ -107,6 +116,16 @@ namespace PizzaApi.Services
             await _pizzaCtx.SaveChangesAsync();
             status.IsError=false;
             return status;
+        }
+
+        private MenuItemDTO PizzaItemToMenuDTO(PizzaItem pizzaItem)
+        {
+            return new MenuItemDTO
+            {
+                Id = pizzaItem.Id,
+                Name = pizzaItem.Name,
+                Price = pizzaItem.Price,
+            };
         }
 
         private PizzaItemDTO PizzaItemToDTO(PizzaItem pizzaItem)

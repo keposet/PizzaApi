@@ -19,16 +19,16 @@ namespace PizzaApi.Controllers
     {
         private readonly AuthHandler _authHandler;
 
-        //TODO: remove
-        private readonly ErrorHandler _errorHandler;
-
-        public LoginController(AuthHandler authHandler, ErrorHandler errorHandler)
+        public LoginController(AuthHandler authHandler)
         {
             _authHandler = authHandler;
-            _errorHandler = errorHandler;
         }
 
-        //TODO: change login req to own model
+        /// <summary>
+        /// User Sign in. Returns JWT in body for convenience
+        /// </summary>
+        /// <param name="loginDTO"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] LoginDTO loginDTO)
         {
