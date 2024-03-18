@@ -2,6 +2,7 @@
 {
     public class OrderItemDTO
     {
+        //TODO: Add IsPickup
         public string? CustomerName { get; set; }
         public long? OrderNumber { get; set; }
         public DateTime? OrderTimeStamp { get; set; }

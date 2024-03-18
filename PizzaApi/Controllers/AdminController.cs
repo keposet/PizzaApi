@@ -12,10 +12,12 @@ namespace PizzaApi.Controllers
     public class AdminController : ControllerBase
     {
         private readonly PizzaItemHandler _pizzaItemHandler;
+        private readonly ErrorHandler _errorHandler;
 
-        public AdminController(PizzaItemHandler pizzaItemHandler )
+        public AdminController(PizzaItemHandler pizzaItemHandler, ErrorHandler errorHandler )
         {
             _pizzaItemHandler = pizzaItemHandler;
+            _errorHandler = errorHandler;
         }
 
         // POST: api/Admin/pizza
@@ -30,12 +32,12 @@ namespace PizzaApi.Controllers
             {
                 var updateDTO = pizzaItemAdminDto.ToDTO();
                 var status = await _pizzaItemHandler.UpdatePizzaItemById(updateDTO.Id, updateDTO);
-                return ErrorMessageHandler(status);
+                return _errorHandler.ErrorMessageHandler(status);
             }
             if (isDelete)
             {   
                 var status = await _pizzaItemHandler.DeletePizzaItemById(pizzaItemAdminDto.Id);
-                return ErrorMessageHandler(status);
+                return _errorHandler.ErrorMessageHandler(status);
             }
             if(!isUpdate && !isDelete)
             {
@@ -48,27 +50,23 @@ namespace PizzaApi.Controllers
         }
 
         // PUT: api/Admin/pizza/5
-        //NOT to spec, but not more correct. 
+        //NOT to spec
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPizzaItem(long id, PizzaItemDTO pizzaItemDTO)
         {
             var status = await _pizzaItemHandler.UpdatePizzaItemById(id, pizzaItemDTO);
-            return ErrorMessageHandler(status);
+            return _errorHandler.ErrorMessageHandler(status);
         }
 
         // DELETE: api/Admin/pizza/5
-        // NOT to spec, but not more correct.
+        // NOT to spec
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePizzaItem(long id)
         {
             var status = await _pizzaItemHandler.DeletePizzaItemById(id);
-            return ErrorMessageHandler(status);
+            return _errorHandler.ErrorMessageHandler(status);
         }
 
-        private IActionResult ErrorMessageHandler(ErrorMessage status)
-        {
-            if (status.IsError) return BadRequest(status.Message);
-            return Ok();
-        }
+
     }
 }

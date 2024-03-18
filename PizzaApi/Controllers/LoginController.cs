@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PizzaApi.Data;
 using PizzaApi.Models;
+using PizzaApi.Services;
+using PizzaApi.Utilities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -15,52 +17,31 @@ namespace PizzaApi.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
+        private readonly AuthHandler _authHandler;
 
-        private IConfiguration _config;
-        private readonly UserContext _context;
+        //TODO: remove
+        private readonly ErrorHandler _errorHandler;
 
-        public LoginController(IConfiguration config, UserContext context)
+        public LoginController(AuthHandler authHandler, ErrorHandler errorHandler)
         {
-            _config = config ?? throw new ArgumentNullException(nameof(config));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _authHandler = authHandler;
+            _errorHandler = errorHandler;
         }
 
         //TODO: change login req to own model
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] LoginRequest loginRequest)
+        public async Task<IActionResult> Post([FromBody] LoginRequestModel loginRequest)
         {
-            if (_context.UserItems == null) return BadRequest(); 
-            //check request username exists. 
-            var userItem = await _context.UserItems.FirstOrDefaultAsync(usr => usr.Name == loginRequest.Email);
+            var authenticateStatus = await _authHandler.Authenticate(loginRequest);
+            if (authenticateStatus.IsError)
+            {
+                return BadRequest(authenticateStatus.Message);
+            }
+            var token = await _authHandler.Authorize(loginRequest); 
 
-            if (userItem == null) return BadRequest();
-
-            //validate password 
-            if (userItem.Credential == null) return BadRequest();
-            var hasher = new PasswordHasher<UserItem>();
-            var hashResult = hasher.VerifyHashedPassword(userItem, userItem.Credential, loginRequest.Password);
-            if(hashResult == PasswordVerificationResult.Failed) return BadRequest();
-            //add claims
-            var userClaims = new List<Claim>();
-            if (userItem.Name == null) return BadRequest();
-            if (userItem.Role == null) return BadRequest();
-            userClaims.Add(new Claim("Name", userItem.Name));
-            userClaims.Add(new Claim("Role", userItem.Role));
-
-            // token creation
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var Sectoken = new JwtSecurityToken(_config["Jwt:Issuer"],
-              _config["Jwt:Issuer"],
-              claims: userClaims,
-              expires: DateTime.Now.AddMinutes(120),
-              signingCredentials: credentials
-              );
-
-            var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
             //include in header if desired
             Response.Headers.Append("Authorization", $"Bearer {token}");
+
             //include in cookie if desired
             Response.Cookies.Append("AccessToken",$"{token}", new CookieOptions() { HttpOnly= true, SameSite = SameSiteMode.Strict });
             

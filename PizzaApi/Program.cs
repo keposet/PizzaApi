@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PizzaApi.Data;
 using PizzaApi.Services;
+using PizzaApi.Utilities;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,8 +18,11 @@ builder.Services.AddDbContext<UserContext>(opt => opt.UseInMemoryDatabase("UserL
 builder.Services.AddDbContext<OrderContext>(opt => opt.UseInMemoryDatabase("OrderList"));
 
 //bespoke services
+builder.Services.AddSingleton<ErrorHandler>();
 builder.Services.AddScoped<OrderHandler>();
 builder.Services.AddScoped<PizzaItemHandler>();
+
+
 
 
 //auth
